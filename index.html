@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>CHKL Live &gt;.&lt;</title>
+        <meta charset="utf-8">
+        <style>
+            body {
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+            }
+            .centre {
+                text-align: center;
+            }
+            .block-1 {
+                background-color: #f0f0f0;
+                padding: 1px;
+                border-radius: 5px;
+                width: 100%;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .block-1 h6 {
+                margin: 0;
+                padding: 0;
+                line-height: inherit;
+            }
+            .block-2 {
+                padding: 10px;
+                border-radius: 5px;
+                font-size: 25px;
+            }
+            .block-3 {
+                padding-top: 1px;
+                padding-left: 10px;
+                border-radius: 5px;
+                font-size: 18px;
+            }
+            .grid-container {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+                text-align: center;
+            }
+            @media (min-width: 600px) {
+                .grid-container {
+                    grid-template-columns: 1fr 1fr;
+                }
+                .grid-container > div:nth-child(1) {
+                    grid-row: 1;
+                }
+                .grid-container > div:nth-child(2) {
+                    grid-row: 2;
+                }
+                .grid-container > div:nth-child(3) {
+                    grid-row: 3;
+                }
+                .grid-container > div:nth-child(4) {
+                    grid-row: 1;
+                }
+                .grid-container > div:nth-child(5) {
+                    grid-row: 2;
+                }
+                .grid-container > div:nth-child(6) {
+                    grid-row: 3;
+                }
+            }
+            button img {
+                    cursor: pointer;
+                }
+                .language-dropdown {
+                    display: none;
+                    position: absolute;
+                    background-color: #f9f9f9;
+                    border-radius: 15px;
+                    min-width: 160px;
+                    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                    right: 10px;
+                    top: 40px;
+                }
+                .language-dropdown a {
+                    color: black;
+                    padding: 12px 16px;
+                    text-decoration: none;
+                    display: block;
+                }
+                .language-dropdown a:hover {
+                    background-color: #f1f1f1;
+                }
+                .language-dropdown.dark-mode {
+                    background-color: #333333;
+                }
+                .language-dropdown.dark-mode a {
+                    color: white;
+                }
+                .language-dropdown.dark-mode a:hover {
+                    background-color: black;
+                }
+        </style>
+        <script src="data.js"></script>
+    </head>
+    <body>
+        <div class="block-1" style="display: flex; align-items: center; justify-content: space-between;">
+            <div id="mode" style="margin-left: 3px; margin-top: 4px;">
+                <button id="modeButton" onclick="toggleMode()" style="background: none; border: none; padding: 0;">
+                    <img src="./img/sun-light.svg" alt="Dark Mode" style="height: 1.2em; margin-right: 10px;">
+                </button>
+            </div>
+            <div class="centre" style="font-size: 1.5em;">
+                <h6>CHKL LIVE IS LIVE!</h6>
+            </div>
+            <div style="display: flex; align-items: center; margin-right: 10px;">
+                <button id="languageButton" onclick="languageOption()" style="background: none; border: none; padding: 0;"">
+                    <img src="./img/languages-light.svg" alt="Languages" style="height: 1.2em;">
+                </button>
+            </div>
+            <div id="languageDropdown" class="language-dropdown">
+                <a href="#" onclick="changeLanguage('ms-my')">Bahasa Melayu</a>
+                <a href="#" onclick="changeLanguage('en-gb')">English</a>
+                <a href="#" onclick="changeLanguage('zh-trad')">正體中文</a>
+                <a href="#" onclick="changeLanguage('zh-simp')">简体中文</a>
+            </div>
+        </div>
+        <div class="centre block-2">
+            <p>
+                今天的學校...
+            </p>
+            <div class="grid-container" style="font-size: 20px;">
+                <div id="初一"></div>
+                <div id="初二"></div>
+                <div id="初三"></div>
+                <div id="高一"></div>
+                <div id="高二"></div>
+                <div id="高三"></div>
+            </div>
+            <p id="desc" style="font-size: 20px;"></p>
+        </div>
+        <div class="block-2">
+            <select id="mode_dropdown">
+                <option value="日" selected>天數</option>
+                <option value="月日">月和天數</option>
+                <option value="到秒">精準到秒</option>
+            </select>
+        </div>
+        <script>
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+            const need_update = []
+
+            const page_load_time_obg = new Date();
+            const page_load_time = page_load_time_obg.getTime();
+            const next_day_time = new Date()
+            next_day_time.setHours(page_load_time_obg.getHours() + 24)
+            next_day_time.setHours(0, 0, 0, 0)
+
+            for (let key in dates) {
+                let date = new Date(dates[key].date_string)
+                dates[key]["DateObj"] = date
+                const newParagraph = document.createElement('p');
+                newParagraph.id = key;
+                newParagraph.className = "block-3";
+                if (page_load_time < date.getTime()) {
+                    need_update.push(key)
+                    newParagraph.innerHTML = `距離${dates[key]["description"]}還有
+                    <span class="centre">
+                    <span id="${key}_cd_year"></span>
+                    <span id="${key}_cd_month"></span>
+                    <span id="${key}_cd_day"></span>
+                    <span id="${key}_cd_hour"></span>
+                    <span id="${key}_cd_minute"></span>
+                    <span id="${key}_cd_second"></span>
+                    </span>`;
+                } else if (page_load_time < new Date(dates[key].end_date_string).getTime()) {
+                    newParagraph.innerHTML = `${dates[key]["description"]}正在進行中`;
+                } else {
+                    if (key.startsWith("SPM") || key.endsWith("UEC")) {
+                        newParagraph.innerHTML = `本學年${dates[key]["description"]}已經結束`;
+                    } else {
+                    newParagraph.innerHTML = `本學期${dates[key]["description"]}已經結束`;
+                    }
+                }
+                
+                document.body.appendChild(newParagraph);
+            }
+            
+            const dropdown = document.getElementById('mode_dropdown');
+            if (document.cookie) {
+                dropdown.value = getCookie('countdown_dropdown')
+            }
+            dropdown.addEventListener('change', function() {
+                const now = new Date();
+                document.cookie = `countdown_dropdown=${dropdown.value}; expires=Fri, 31 Dec 9999 23:59:59 GMT; sameSite=Strict;`
+                need_update.forEach(item => {
+                    update(item, now)
+                })
+            });
+
+            function clock() {
+                const now = new Date();
+                need_update.forEach(item => {
+                    update(item, now)
+                })
+                const nextSecond = new Date(now.getTime() + 1000).setMilliseconds(0);    
+                const delay = nextSecond - now;
+                setTimeout(clock, delay);
+            }
+            clock()
+
+            function daily() {
+                let now = new Date()
+                let today_date = String(now.getDate()).padStart(2, '0');
+                let today_month = String(now.getMonth() + 1).padStart(2, '0');
+                let today_year = now.getFullYear();
+                let today_date_str = today_year + "-" + today_month + "-" + today_date;
+                if (today_date_str in live) {
+                    let today = live[today_date_str];
+                    if (typeof today === 'object') {
+                        if (Object.keys(today).length == 0) {
+                            document.getElementById('desc').innerHTML = "今天是一個普通的上課天";
+                        } else {
+                            ["初一", "初二", "初三", "高一", "高二", "高三"].forEach(level => {
+                            if (level in today) {
+                               const element = document.getElementById(level);
+                                element.innerHTML = level + "<br />" + today[level];
+                            } else {
+                                document.getElementById(level).innerHTML = level + "<br />" + "照常上課";
+                            }
+                            });
+                        }
+                    } else {
+                        document.getElementById('desc').innerText = today;
+                    }
+                } else if (new Date().getDay() === 0) {
+                    document.getElementById('desc').innerText = "今天星期日";
+                } else {
+                    document.getElementById('desc').innerText = "沒有今天的資訊";
+                }
+                need_update.forEach(key => {
+                    let date = dates[key].DateObj
+                    if (date - now < 86400000 && next_day_time > date) {
+                        setTimeout(() => {
+                            need_update.splice(need_update.indexOf(key), 1)
+                            document.getElementById(key).innerText = `${dates[key]["description"]}正在進行中`;
+                        }, date - now)
+                    }
+                    let test_end = new Date(dates[key].end_date_string)
+                    if (test_end - now < 86400000) {
+                        setTimeout(() => {
+                            if (key.startsWith("SPM") || key.endsWith("UEC")) {
+                                document.getElementById(key).innerText = `本學年${dates[key]["description"]}已經結束`;
+                            } else {
+                                document.getElementById(key).innerText = `本學期${dates[key]["description"]}已經結束`;
+                            }
+                        }, test_end - now)
+                    }
+                })
+                setTimeout(() => {
+                    next_day_time.setHours(next_day_time.getHours() + 24)
+                    daily()
+                }, next_day_time - new Date())
+            }
+            daily()
+
+            function update(item, now) {
+                let diff = new Date(dates[item]["date_string"]).setHours(0, 0, 0) - new Date().setHours(0, 0, 0);
+                let second = "", minute = "", hour = "", day = "", month = "";
+                switch (dropdown.value) {
+                    case '日':
+                        day = Math.floor(diff / (1000 * 60 * 60 * 24)) + 1 + "天";
+                        document.getElementById(`${item}_cd_second`).innerText = second;
+                        document.getElementById(`${item}_cd_minute`).innerText = minute;
+                        document.getElementById(`${item}_cd_hour`).innerText = hour;
+                        document.getElementById(`${item}_cd_month`).innerText = month;
+                        break;
+                    case '月日':
+                        day = Math.floor((diff / (1000 * 60 * 60 * 24)) % 30) + 1 + "天";
+                        month = Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
+                        if (month == 0) month = ""
+                        else month = month + "個月";
+                        document.getElementById(`${item}_cd_month`).innerText = month + "月";
+                        break;
+                    default:
+                        diff = dates[item]["DateObj"].getTime() - now.getTime();
+                        let not = Math.ceil(diff / 1000);
+                        second = Math.floor(not % 60);
+                        not = Math.floor(not / 60);
+                        minute = Math.floor(not % 60);
+                        not = Math.floor(not / 60);
+                        hour = Math.floor(not % 24);
+                        not = Math.floor((not / 24));
+                        day = Math.floor(not % 30) == 0 ?"" : Math.floor(not % 30) + "天";
+                        not = Math.floor((not / 30));
+                        month = Math.floor(not) == 0 ? "" : Math.floor(not) + "個月";
+                        second= second + "秒";
+                        minute = minute + "分鐘";
+                        hour = hour + "個小時";
+                        break;
+                }
+                document.getElementById(`${item}_cd_second`).innerText = second;
+                document.getElementById(`${item}_cd_minute`).innerText = minute;
+                document.getElementById(`${item}_cd_hour`).innerText = hour;
+                document.getElementById(`${item}_cd_day`).innerText = day;
+                document.getElementById(`${item}_cd_month`).innerText = month;
+            }
+
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible') {
+
+                }
+            });
+
+            function displayCountdown(exam) {
+            const examDate = new Date(exam.date_string);
+        const now = new Date();
+        const timeDiff = examDate - now;
+        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        document.getElementById('countdownDisplay').innerText = `Countdown to ${exam.description}: ${days} days`;
+            }
+            let mode = "light"
+            if (document.cookie.includes('mode')) {
+                mode = getCookie('mode')
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                mode = "dark"
+            } else {
+                document.cookie = "mode=light;"
+            }
+            function setMode(mode) {
+                if (mode == "dark") {
+                    mode = "dark"
+                    document.body.style.backgroundColor = "#000000";
+                    document.body.style.color = "#ffffff";
+                    document.querySelector('.block-1').style.backgroundColor = "#333333";
+                    document.querySelector('.block-1').style.color = "#fefdfc";
+                    document.querySelector('#modeButton img').src = "./img/moon-dark.svg";
+                    document.querySelector('#languageButton img').src = "./img/languages-dark.svg";
+                    document.querySelector('.language-dropdown').classList.add("dark-mode");
+                } else {
+                    document.body.style.backgroundColor = "#ffffff";
+                    document.body.style.color = "#000000";
+                    document.querySelector('.block-1').style.backgroundColor = "#f0f0f0";
+                    document.querySelector('.block-1').style.color = "#000000";
+                    document.querySelector('#modeButton img').src = "./img/sun-light.svg";
+                    document.querySelector('#languageButton img').src = "./img/languages-light.svg";
+                    document.querySelector('.language-dropdown').classList.remove("dark-mode");
+                }
+            }
+            setMode(mode)
+            function toggleMode() {
+                if (mode == "light") {
+                    mode = "dark"
+                    setMode("dark")
+                    document.cookie = "mode=dark; expires=Fri, 31 Dec 9999 23:59:59 GMT; sameSite=Strict;"
+                    
+                } else {
+                    mode = "light"
+                    setMode("light")
+                    document.cookie = "mode=light; expires=Fri, 31 Dec 9999 23:59:59 GMT; sameSite=Strict;"
+                }
+            }
+            function languageOption() {
+                const dropdown = document.getElementById('languageDropdown');
+                dropdown.style.display = dropdown.style.display == 'block' ? 'none' : 'block';
+            }
+        </script>
+    </body> 
+</html>
