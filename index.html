@@ -65,36 +65,36 @@
                 }
             }
             button img {
-                    cursor: pointer;
-                }
-                .language-dropdown {
-                    display: none;
-                    position: absolute;
-                    background-color: #f9f9f9;
-                    border-radius: 15px;
-                    min-width: 160px;
-                    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-                    right: 10px;
-                    top: 40px;
-                }
-                .language-dropdown a {
-                    color: black;
-                    padding: 12px 16px;
-                    text-decoration: none;
-                    display: block;
-                }
-                .language-dropdown a:hover {
-                    background-color: #f1f1f1;
-                }
-                .language-dropdown.dark-mode {
-                    background-color: #333333;
-                }
-                .language-dropdown.dark-mode a {
-                    color: white;
-                }
-                .language-dropdown.dark-mode a:hover {
-                    background-color: black;
-                }
+                cursor: pointer;
+            }
+            .language-dropdown {
+                display: none;
+                position: absolute;
+                background-color: #f9f9f9;
+                border-radius: 15px;
+                min-width: 160px;
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                right: 10px;
+                top: 40px;
+            }
+            .language-dropdown a {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+            }
+            .language-dropdown a:hover {
+                background-color: #f1f1f1;
+            }
+            .language-dropdown.dark-mode {
+                background-color: #333333;
+            }
+            .language-dropdown.dark-mode a {
+                color: white;
+            }
+            .language-dropdown.dark-mode a:hover {
+                background-color: black;
+            }
         </style>
         <script src="data.js"></script>
     </head>
@@ -210,6 +210,11 @@
 
             function daily() {
                 let now = new Date()
+                function clearFormInfo() {
+                    ["初一", "初二", "初三", "高一", "高二", "高三"].forEach(level => {
+                        document.getElementById(level).innerText = "";
+                    });
+                }
                 let today_date = String(now.getDate()).padStart(2, '0');
                 let today_month = String(now.getMonth() + 1).padStart(2, '0');
                 let today_year = now.getFullYear();
@@ -219,7 +224,9 @@
                     if (typeof today === 'object') {
                         if (Object.keys(today).length == 0) {
                             document.getElementById('desc').innerHTML = "今天是一個普通的上課天";
+                            clearFormInfo();
                         } else {
+                            document.getElementById('desc').innerHTML = "";
                             ["初一", "初二", "初三", "高一", "高二", "高三"].forEach(level => {
                             if (level in today) {
                                const element = document.getElementById(level);
@@ -231,11 +238,14 @@
                         }
                     } else {
                         document.getElementById('desc').innerText = today;
+                        clearFormInfo();
                     }
                 } else if (new Date().getDay() === 0) {
                     document.getElementById('desc').innerText = "今天星期日";
+                    clearFormInfo();
                 } else {
                     document.getElementById('desc').innerText = "沒有今天的資訊";
+                    clearFormInfo();
                 }
                 need_update.forEach(key => {
                     let date = dates[key].DateObj
@@ -277,7 +287,7 @@
                     case '月日':
                         day = Math.floor((diff / (1000 * 60 * 60 * 24)) % 30) + 1 + "天";
                         month = Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
-                        if (month == 0) month = ""
+                        if (month <= 0) month = ""
                         else month = month + "個月";
                         document.getElementById(`${item}_cd_month`).innerText = month + "月";
                         break;
