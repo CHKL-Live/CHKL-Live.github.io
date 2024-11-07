@@ -1,8 +1,8 @@
 const dates = {
     "ujian_sekolah": {
-        "description": "統一測驗",
-        "date_string": "2024-10-07T08:10+08:00",
-        "end_date_string": "2024-10-14T14:10+08:00"
+        "description": "大考",
+        "date_string": "2024-11-12T08:00+08:00",
+        "end_date_string": "2024-11-21T12:00+08:00"
     },
     "SPM_percubaan": {
         "description": "SPM 預試",
